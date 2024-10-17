@@ -6,16 +6,19 @@ int createDb(char *fileName) {
   int fd = open(fileName, O_RDONLY);
   if (fd != -1) {
     close(fd);
-    printf("file already exists\n");
-    return -1;
-  }
-  fd = open(fileName, O_RDWR | O_CREAT, 0644);
-  if (fd == -1) {
-    printf("file not created\n");
+    printf("can't create database\n");
     perror("open");
     return -1;
+  } else {
+    fd = open(fileName, O_RDWR | O_CREAT, 0644);
+    if (fd == -1) {
+      printf("file not created\n");
+      perror("open");
+      return -1;
+    }
+    printf("database created\n");
+    return fd;
   }
-  return fd;
 }
 int openDb(char *fileName) {
   int fd = open(fileName, O_RDWR, 0644);
@@ -23,5 +26,6 @@ int openDb(char *fileName) {
     perror("open");
     return -1;
   }
+  printf("database opened\n");
   return fd;
 }

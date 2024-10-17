@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
   char *filePath = NULL;
   bool newfile = false;
   int dbfd;
+
   while ((currentArg = getopt(argc, argv, "nf:")) != -1) {
     switch (currentArg) {
     case 'n':
@@ -43,17 +44,12 @@ int main(int argc, char *argv[]) {
   if (newfile) {
     dbfd = createDb(filePath);
     if (dbfd == -1) {
-      printf("can't create database\n");
       return -1;
-    } else {
-      printf("database created\n");
     }
   } else {
     dbfd = openDb(filePath);
     if (dbfd == -1) {
       return -1;
-    } else {
-      printf("database opened\n");
     }
   }
 
