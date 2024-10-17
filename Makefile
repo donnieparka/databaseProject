@@ -5,7 +5,10 @@ OBJ = $(patsubst src/%.c, obj/%.o, $(SRC))
 run: clean default
 	./$(TARGET) -f ./mynewdb.db -n
 
-default: $(TARGET)
+default: create_dirs $(TARGET)
+
+create_dirs:
+	mkdir -p obj bin
 
 clean:
 	rm -f obj/*.o
