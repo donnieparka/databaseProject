@@ -3,7 +3,7 @@
 
 #include "../include/parse.h"
 
-struct dbheader_t *create_db_header(int fd, struct dbheader_t **header_out) {
+struct dbheader_t *create_db_header(int fd) {
   struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
   if (header == NULL) {
     perror("calloc");

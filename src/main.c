@@ -15,12 +15,14 @@ void print_usage(char *argv[]) {
 int main(int argc, char *argv[]) {
   if (argc < 3) {
     print_usage(argv);
-    return -1;
+    return STATUS_ERROR;
   }
+
   int currentArg;
   char *filePath = NULL;
   bool newfile = false;
   int dbfd;
+  struct dbheader_t *header = NULL;
 
   while ((currentArg = getopt(argc, argv, "nf:")) != -1) {
     switch (currentArg) {
@@ -34,7 +36,7 @@ int main(int argc, char *argv[]) {
       printf("unknown argument -%c\n", currentArg);
       break;
     default:
-      return -1;
+      return STATUS_ERROR;
     }
   }
   if (filePath == NULL) {
@@ -44,14 +46,18 @@ int main(int argc, char *argv[]) {
   if (newfile) {
     dbfd = createDb(filePath);
     if (dbfd == -1) {
-      return -1;
+      return STATUS_ERROR;
     }
+    header = create_db_header(dbfd);
+    if (header == NULL) {
+      return STATUS_ERROR;
+    }
+    printf("%d bytes\n", header->filesize);
   } else {
     dbfd = openDb(filePath);
     if (dbfd == -1) {
-      return -1;
+      return STATUS_ERROR;
     }
   }
-
   return 0;
 }
