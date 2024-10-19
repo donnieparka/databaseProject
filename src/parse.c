@@ -18,7 +18,7 @@ void output_file(int fd, struct dbheader_t *dbhdr) {
     perror("write");
     return;
   }
-  printf("db written");
+  printf("db written\n");
   return;
 }
 
@@ -46,15 +46,18 @@ int validate_db_header(int fd, struct dbheader_t **header_out) {
   struct stat h_stat = {0};
   fstat(fd, &h_stat);
   if (header->filesize != h_stat.st_size) {
-    printf("filesize mismatch");
+    printf("filesize mismatch\n");
     free(header);
     return STATUS_ERROR;
   }
   if (header->version != 1) {
-    printf("database version wrong");
+    printf("database version wrong\n");
+    free(header);
     return STATUS_ERROR;
   }
-  printf("validation ok");
+  printf("validation ok\n");
+  free(header);
+  *header_out = header;
   return STATUS_SUCCESS;
 }
 
@@ -62,12 +65,13 @@ struct dbheader_t *create_db_header(int fd) {
   struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
   if (header == NULL) {
     perror("calloc");
-    printf("calloc failed");
+    printf("calloc failed\n");
     return NULL;
   }
   header->count = 0;
   header->version = 0x1;
   header->filesize = sizeof(struct dbheader_t);
   header->magic = HEADER_MAGIC;
+  printf("header created\n");
   return header;
 }

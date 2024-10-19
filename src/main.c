@@ -52,14 +52,13 @@ int main(int argc, char *argv[]) {
     if (header == NULL) {
       return STATUS_ERROR;
     }
-    if (validate_db_header(dbfd, &header) == STATUS_ERROR) {
-      printf("file validation failed");
-      return STATUS_ERROR;
-    }
-    //    output_file(dbfd, header);
   } else {
     dbfd = openDb(filePath);
     if (dbfd == -1) {
+      return STATUS_ERROR;
+    }
+    if (validate_db_header(dbfd, &header) == STATUS_ERROR) {
+      printf("file validation failed");
       return STATUS_ERROR;
     }
   }
