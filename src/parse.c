@@ -57,13 +57,17 @@ int validate_db_header(int fd, struct dbheader_t **header_out) {
     return STATUS_ERROR;
   }
   printf("validation ok\n");
-  free(header);
   *header_out = header;
   return STATUS_SUCCESS;
 }
 
 struct employee_t *read_employees(int fd, struct dbheader_t *dbhdr) {
   unsigned short count = dbhdr->count;
+  if (count == 0) {
+    return calloc(
+        1, sizeof(struct employee_t)); // Return empty array for new files
+  }
+
   struct employee_t *employees = calloc(count, sizeof(struct employee_t));
   if (employees == NULL) {
     perror("calloc");
@@ -90,12 +94,11 @@ struct employee_t *init_employee(char *name, char *address,
   return employee;
 }
 
-int add_employee(unsigned short count, struct employee_t *employee,
-                 struct employee_t *employees) {}
-
-void output_file(int fd, struct dbheader_t *dbhdr) {
+void output_file(int fd, struct dbheader_t *dbhdr,
+                 struct employee_t *employees) {
   dbhdr->magic = htonl(dbhdr->magic);
-  dbhdr->filesize = htonl(sizeof(struct dbheader_t));
+  dbhdr->filesize = htonl(sizeof(struct dbheader_t) +
+                          dbhdr->count * sizeof(struct employee_t));
   dbhdr->count = htons(dbhdr->count);
   dbhdr->version = htons(dbhdr->version);
 
@@ -104,6 +107,16 @@ void output_file(int fd, struct dbheader_t *dbhdr) {
     perror("write");
     return;
   }
+
+  for (int i = 0; i < ntohs(dbhdr->count); i++) {
+    employees[i].hours = htonl(employees[i].hours);
+  }
+
+  if (write(fd, employees, ntohs(dbhdr->count) * sizeof(struct employee_t)) ==
+      -1) {
+    perror("write");
+    return;
+  }
+
   printf("db written\n");
-  return;
 }

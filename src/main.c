@@ -22,12 +22,17 @@ int main(int argc, char *argv[]) {
   int currentArg;
   char *filePath = NULL;
   bool newfile = false;
+  bool list = false;
+  bool update = false;
+  bool remove = false;
   int dbfd;
+  int updated_hours;
+  int select = -1;
   struct dbheader_t *header = NULL;
   struct employee_t *employee = NULL;
   struct employee_t *employees = NULL;
 
-  while ((currentArg = getopt(argc, argv, "nf:a")) != -1) {
+  while ((currentArg = getopt(argc, argv, "nf:alhr")) != -1) {
     switch (currentArg) {
     case 'n':
       newfile = true;
@@ -40,13 +45,23 @@ int main(int argc, char *argv[]) {
       char address[256];
       unsigned int hours;
       printf("full name\n");
-      scanf("%s", name);
+      scanf("%255s", name);
       printf("address\n");
-      scanf("%s", address);
+      scanf(" %255s", address);
       printf("hours worked:\n");
-      scanf("%d", &hours);
+      scanf(" %d", &hours);
       employee = init_employee(name, address, hours);
       break;
+    case 'l':
+      list = true;
+      break;
+    case 'h':
+      list = true;
+      update = true;
+      break;
+    case 'r':
+      remove = true;
+      list = true;
     case '?':
       printf("unknown argument -%c\n", currentArg);
       break;
@@ -83,12 +98,58 @@ int main(int argc, char *argv[]) {
   }
   if (employee) {
     header->count++;
-    if (!realloc(employees, header->count * sizeof(struct employee_t))) {
-      printf("reallc failed");
+    struct employee_t *new_employees =
+        realloc(employees, header->count * sizeof(struct employee_t));
+    if (new_employees == NULL) {
+      printf("realloc failed");
+      free(employees);
       return STATUS_ERROR;
     }
-    add_employee(header->count, employee, employees);
+    employees = new_employees;
+    employees[header->count - 1] = *employee;
+    free(employee);
   }
-  output_file(dbfd, header);
-  return 0;
+
+  if (list) {
+    for (int i = 0; i < header->count; i++) {
+      printf("-----------------------\n");
+      printf("impiegato %d: %s\n", i, employees[i].name);
+      printf("vive a: %s\n", employees[i].address);
+      printf("ha lavorato : %d ore\n", employees[i].hours);
+      printf("-----------------------\n");
+    }
+    if (update) {
+      printf("quale dipendente vuoi aggiornare?");
+      scanf("%d", &select);
+      while (select > header->count - 1 || select < 0) {
+        printf("seleziona numero impiegato valido: \n");
+        scanf("%d", &select);
+      }
+      printf("enter updated hours: \n");
+      scanf("%d", &updated_hours);
+      employees[select].hours = updated_hours;
+
+    } else if (remove) {
+
+      printf("quale dipendente vuoi eliminare?");
+      scanf("%d", &select);
+
+      while (select > header->count - 1 || select < 0) {
+
+        printf("seleziona numero impiegato valido: \n");
+        scanf("%d", &select);
+      }
+      header->count--;
+      struct employee_t *new_employees =
+          realloc(employees, header->count * sizeof(struct employee_t));
+      if (new_employees == NULL) {
+        printf("realloc failed");
+        free(employees);
+        return STATUS_ERROR;
+      }
+      employees = new_employees;
+    }
+    output_file(dbfd, header, employees);
+    return 0;
+  }
 }
