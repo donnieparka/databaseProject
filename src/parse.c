@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +9,7 @@
 #include "../include/common.h"
 #include "../include/parse.h"
 
-struct dbheader_t *create_db_header(int fd) {
+struct dbheader_t *create_db_header() {
   struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
   if (header == NULL) {
     perror("calloc");
@@ -47,7 +48,7 @@ int validate_db_header(int fd, struct dbheader_t **header_out) {
   struct stat h_stat = {0};
   fstat(fd, &h_stat);
   if (header->filesize != h_stat.st_size) {
-    printf("filesize mismatch\n");
+    printf("filesize mismatch %d\n", header->filesize);
     free(header);
     return STATUS_ERROR;
   }
@@ -64,8 +65,7 @@ int validate_db_header(int fd, struct dbheader_t **header_out) {
 struct employee_t *read_employees(int fd, struct dbheader_t *dbhdr) {
   unsigned short count = dbhdr->count;
   if (count == 0) {
-    return calloc(
-        1, sizeof(struct employee_t)); // Return empty array for new files
+    return NULL; // Return empty array for new files
   }
 
   struct employee_t *employees = calloc(count, sizeof(struct employee_t));
@@ -85,8 +85,7 @@ struct employee_t *read_employees(int fd, struct dbheader_t *dbhdr) {
   return employees;
 }
 
-struct employee_t *init_employee(char *name, char *address,
-                                 unsigned int hours) {
+struct employee_t *init_employee(char *name, char *address, unsigned int hours) {
   struct employee_t *employee = malloc(sizeof(struct employee_t));
   strcpy(employee->name, name);
   strcpy(employee->address, address);
@@ -94,11 +93,12 @@ struct employee_t *init_employee(char *name, char *address,
   return employee;
 }
 
-void output_file(int fd, struct dbheader_t *dbhdr,
-                 struct employee_t *employees) {
+void output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
+  dbhdr->filesize = sizeof(struct dbheader_t) + (dbhdr->count * sizeof(struct employee_t));
+  printf("count: %d\n", dbhdr->count);
+  printf("%d\n", dbhdr->filesize);
   dbhdr->magic = htonl(dbhdr->magic);
-  dbhdr->filesize = htonl(sizeof(struct dbheader_t) +
-                          dbhdr->count * sizeof(struct employee_t));
+  dbhdr->filesize = htonl(dbhdr->filesize);
   dbhdr->count = htons(dbhdr->count);
   dbhdr->version = htons(dbhdr->version);
 
@@ -107,16 +107,15 @@ void output_file(int fd, struct dbheader_t *dbhdr,
     perror("write");
     return;
   }
+  if (employees != NULL && dbhdr->count > 0) {
+    for (int i = 0; i < ntohs(dbhdr->count); i++) {
+      employees[i].hours = htonl(employees[i].hours);
+    }
 
-  for (int i = 0; i < ntohs(dbhdr->count); i++) {
-    employees[i].hours = htonl(employees[i].hours);
+    if (write(fd, employees, ntohs(dbhdr->count) * sizeof(struct employee_t)) == -1) {
+      perror("write");
+      return;
+    }
+    printf("db written\n");
   }
-
-  if (write(fd, employees, ntohs(dbhdr->count) * sizeof(struct employee_t)) ==
-      -1) {
-    perror("write");
-    return;
-  }
-
-  printf("db written\n");
 }
