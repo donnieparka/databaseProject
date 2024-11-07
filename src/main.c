@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
   bool list = false;
   bool update = false;
   bool remove = false;
+  bool addOne = false;
   int dbfd = 0;
   int updated_hours;
   int select = -1;
@@ -42,16 +43,7 @@ int main(int argc, char *argv[]) {
       filePath = optarg;
       break;
     case 'a':
-      char address[256];
-      char name[256];
-      unsigned int hours;
-      printf("full name\n");
-      scanf("%255s", name);
-      printf("address\n");
-      scanf(" %255s", address);
-      printf("hours worked:\n");
-      scanf(" %d", &hours);
-      employee = init_employee(name, address, hours);
+      addOne = true;
       break;
     case 'l':
       list = true;
@@ -98,7 +90,8 @@ int main(int argc, char *argv[]) {
       perror("read");
       return STATUS_ERROR;
     }
-    if (employee) {
+    if (addOne) {
+      employee = init_employee();
       header->count++;
       struct employee_t *new_employees =
           realloc(employees, header->count * sizeof(struct employee_t));
@@ -112,6 +105,10 @@ int main(int argc, char *argv[]) {
       employees[header->count - 1] = *employee;
       free(employee);
     }
+    if (header->count == 0) {
+      printf("non ci sono impiegati da listare o modificare");
+      return STATUS_ERROR;
+    }
     if (list) {
       for (int i = 0; i < header->count; i++) {
         printf("-----------------------\n");
@@ -121,24 +118,12 @@ int main(int argc, char *argv[]) {
         printf("-----------------------\n");
       }
       if (update) {
-        printf("quale dipendente vuoi aggiornare?");
-        scanf("%d", &select);
-        while (select > header->count - 1 || select < 0) {
-          printf("seleziona numero impiegato valido: \n");
-          scanf("%d", &select);
-        }
+        select = choose_employee(header->count);
         printf("enter updated hours: \n");
         scanf("%d", &updated_hours);
         employees[select].hours = updated_hours;
       } else if (remove) {
-
-        printf("quale dipendente vuoi eliminare?");
-        scanf("%d", &select);
-
-        while (select > header->count - 1 || select < 0) {
-          printf("seleziona numero impiegato valido: \n");
-          scanf("%d", &select);
-        }
+        select = choose_employee(header->count);
         if (select != header->count - 1) {
           for (int i = select; i < header->count - 1; i++) {
             employees[i] = employees[i + 1];
@@ -165,8 +150,6 @@ int main(int argc, char *argv[]) {
   if (remove) {
     if (ftruncate(dbfd, sizeof(struct dbheader_t) + sizeof(struct employee_t) * header->count) != 0) {
       perror("ftruncate");
-    } else {
-      printf("dio cane");
     }
   }
   output_file(dbfd, header, employees);

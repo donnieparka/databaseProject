@@ -85,12 +85,32 @@ struct employee_t *read_employees(int fd, struct dbheader_t *dbhdr) {
   return employees;
 }
 
-struct employee_t *init_employee(char *name, char *address, unsigned int hours) {
+struct employee_t *init_employee() {
+  char address[256];
+  char name[256];
+  unsigned int hours;
+  printf("full name\n");
+  scanf("%255s", name);
+  printf("address\n");
+  scanf(" %255s", address);
+  printf("hours worked:\n");
+  scanf(" %d", &hours);
   struct employee_t *employee = malloc(sizeof(struct employee_t));
   strcpy(employee->name, name);
   strcpy(employee->address, address);
   employee->hours = hours;
   return employee;
+}
+
+int choose_employee(int count) {
+  int select;
+  printf("quale dipendente vuoi aggiornare?\n");
+  scanf("%d", &select);
+  while (select > count - 1 || select < 0) {
+    printf("seleziona numero impiegato valido: \n");
+    scanf("%d", &select);
+  }
+  return select;
 }
 
 void output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
