@@ -48,7 +48,7 @@ int validate_db_header(int fd, struct dbheader_t **header_out) {
   struct stat h_stat = {0};
   fstat(fd, &h_stat);
   if (header->filesize != h_stat.st_size) {
-    printf("filesize mismatch %d\n", header->filesize);
+    printf("filesize mismatch \n");
     free(header);
     return STATUS_ERROR;
   }
@@ -85,21 +85,43 @@ struct employee_t *read_employees(int fd, struct dbheader_t *dbhdr) {
   return employees;
 }
 
-struct employee_t *init_employee() {
+struct employee_t *add_employee(struct employee_t *employees, int count) {
   char address[256];
   char name[256];
   unsigned int hours;
+
   printf("full name\n");
-  scanf("%255s", name);
+  if (scanf("%255s", name) != 1) {
+    fprintf(stderr, "Errore nella lettura del nome\n");
+    return NULL;
+  }
+
   printf("address\n");
-  scanf(" %255s", address);
+  if (scanf(" %255s", address) != 1) {
+    fprintf(stderr, "Errore nella lettura dell'indirizzo\n");
+    return NULL;
+  }
+
   printf("hours worked:\n");
-  scanf(" %d", &hours);
-  struct employee_t *employee = malloc(sizeof(struct employee_t));
-  strcpy(employee->name, name);
-  strcpy(employee->address, address);
-  employee->hours = hours;
-  return employee;
+  if (scanf(" %d", &hours) != 1) {
+    fprintf(stderr, "Errore nella lettura delle ore\n");
+    return NULL;
+  }
+  struct employee_t *new_employee = &employees[count - 1];
+  strcpy(new_employee->name, name);
+  strcpy(new_employee->address, address);
+  new_employee->hours = hours;
+  return employees;
+}
+
+struct employee_t *realloc_employees(struct employee_t *employees, int count) {
+  struct employee_t *new_employees = realloc(employees, count * sizeof(struct employee_t));
+  if (new_employees == NULL) {
+    perror("realloc");
+    free(employees);
+    return NULL;
+  }
+  return new_employees;
 }
 
 int choose_employee(int count) {
@@ -115,8 +137,6 @@ int choose_employee(int count) {
 
 void output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
   dbhdr->filesize = sizeof(struct dbheader_t) + (dbhdr->count * sizeof(struct employee_t));
-  printf("count: %d\n", dbhdr->count);
-  printf("%d\n", dbhdr->filesize);
   dbhdr->magic = htonl(dbhdr->magic);
   dbhdr->filesize = htonl(dbhdr->filesize);
   dbhdr->count = htons(dbhdr->count);

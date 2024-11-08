@@ -19,8 +19,8 @@ struct employee_t {
 struct dbheader_t *create_db_header();
 int validate_db_header(int fd, struct dbheader_t **header_out);
 struct employee_t* read_employees(int fd, struct dbheader_t *dhhdr);
-struct employee_t* init_employee();
+struct employee_t* realloc_employees(struct employee_t *employees, int count);
+struct employee_t* add_employee(struct employee_t *employees, int count);
 int choose_employee(int count);
-int add_employee(unsigned short count, struct employee_t* employee, struct employee_t* employees);
 void output_file(int fd, struct dbheader_t*, struct employee_t* employees);
 #endif

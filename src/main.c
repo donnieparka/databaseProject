@@ -27,9 +27,8 @@ int main(int argc, char *argv[]) {
   bool update = false;
   bool remove = false;
   bool addOne = false;
+  int count;
   int dbfd = 0;
-  int updated_hours;
-  int select = -1;
   struct dbheader_t *header = NULL;
   struct employee_t *employee = NULL;
   struct employee_t *employees = NULL;
@@ -84,6 +83,7 @@ int main(int argc, char *argv[]) {
       printf("file validation failed");
       return STATUS_ERROR;
     }
+
     employees = read_employees(dbfd, header);
     if (employees == NULL && header->count > 0) {
       printf("failed to read employees");
@@ -91,19 +91,13 @@ int main(int argc, char *argv[]) {
       return STATUS_ERROR;
     }
     if (addOne) {
-      employee = init_employee();
       header->count++;
-      struct employee_t *new_employees =
-          realloc(employees, header->count * sizeof(struct employee_t));
-      if (new_employees == NULL) {
-        printf("realloc failed\n");
-        perror("realloc");
-        free(employees);
+      employees = realloc_employees(employees, header->count);
+      if (employees == NULL) {
+        printf("realloc failed in realloc_employees\n");
         return STATUS_ERROR;
       }
-      employees = new_employees;
-      employees[header->count - 1] = *employee;
-      free(employee);
+      employees = add_employee(employees, header->count);
     }
     if (header->count == 0) {
       printf("non ci sono impiegati da listare o modificare");
@@ -118,19 +112,25 @@ int main(int argc, char *argv[]) {
         printf("-----------------------\n");
       }
       if (update) {
+        int select;
+        int updated_hours;
         select = choose_employee(header->count);
         printf("enter updated hours: \n");
         scanf("%d", &updated_hours);
         employees[select].hours = updated_hours;
       } else if (remove) {
+        int select;
         select = choose_employee(header->count);
-        if (select != header->count - 1) {
+        bool is_last = select == header->count - 1;
+
+        if (!is_last) {
           for (int i = select; i < header->count - 1; i++) {
             employees[i] = employees[i + 1];
           }
+          is_last = false;
         }
         header->count--;
-        if (header->count > 0) {
+        if (header->count > 0 && !is_last) {
           struct employee_t *new_employees = realloc(employees, header->count * sizeof(struct employee_t));
           if (new_employees == NULL) {
             printf("realloc smaller failed\n");
