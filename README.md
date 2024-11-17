@@ -13,7 +13,6 @@ Flags
 -l list employees
 -h update hours
 -r remove 1 employee
------------------------
 
 Employee struct:
 Name:
