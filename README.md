@@ -10,9 +10,9 @@ Flags <br>
 -n = new file <br>
 -f = filepath <br>
 -a = add one employee <br>
--l list employees <br>
--h update hours <br>
--r remove 1 employee <br>
+-l = list employees <br>
+-h = update hours <br>
+-r = remove 1 employee <br>
 
 Employee struct: <br>
 Name: <br>
