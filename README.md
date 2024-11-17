@@ -1,23 +1,23 @@
 Database project is a simple console app built for the sake of learning C.
 
-Create file:
+Create file: <br>
 employeesDb -n -f DbFile
 
-Open file:
+Open file: <br>
 employeesDb -f DbFile
 
-Flags
--n = new file \n
--f = filepath
--a = add one employee
--l list employees
--h update hours
--r remove 1 employee
+Flags <br>
+-n = new file <br>
+-f = filepath <br>
+-a = add one employee <br>
+-l list employees <br>
+-h update hours <br>
+-r remove 1 employee <br>
 
-Employee struct:
-Name:
-Address:
-hours:
+Employee struct: <br>
+Name: <br>
+Address: <br>
+hours: <br>
 
-when you remove them it will say something bad about them like:
+when you remove them it will say something bad about them like: <br>
 Get ready to your new underground life. Sorry i meant underbridge.
