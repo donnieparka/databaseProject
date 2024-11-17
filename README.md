@@ -7,7 +7,7 @@ Open file:
 employeesDb -f DbFile
 
 Flags
--n = new file
+-n = new file \n
 -f = filepath
 -a = add one employee
 -l list employees
