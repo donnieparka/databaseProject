@@ -13,7 +13,12 @@ void print_usage(char *argv[]) {
   printf("Usage: %s -n -f DbFile\n", argv[0]);
   printf("-n specify if the file has to be created\n");
   printf("-f (required) specify the Db path\n");
+  printf("-a add a new employee\n");
+  printf("-l list the employees\n");
+  printf("-h update the hours of an employee\n");
+  printf("-r remove an employee\n");
 }
+
 int main(int argc, char *argv[]) {
   if (argc < 3) {
     print_usage(argv);

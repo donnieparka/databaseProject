@@ -1,16 +1,22 @@
-{stdenv}:
+{pkgs ? import <nixpkgs> {}}:
 
-stdenv.mkderivation {
+with pkgs;
+
+stdenv.mkDerivation {
 	pname = "employeesDb";
 	version = "v0.0.1";
-	src = "./src";
-	buildInputs = [./include/*];
+	src = ./.;
+	nativeBuildInputs = [ gcc ];
 	buildPhase = ''
 		mkdir -p obj bin
-		gcc -c ./src/*.c -o ./obj/$*.o -I include
-		gcc -o ./obj/*.o employeesDb
+		for file in src/*.c; do
+			name=$(basename $file .c)
+			gcc -c $file -o obj/$name.o -I include
+		done
+		gcc -o  employeesDb obj/*.o
 	'';
 	installPhase = ''
-		cp ./bin/dbView $out/bin
+	 	mkdir -p $out/bin
+		cp employeesDb $out/bin
 	'';
 }

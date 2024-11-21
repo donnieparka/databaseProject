@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1732014248,
+        "narHash": "sha256-y/MEyuJ5oBWrWAic/14LaIr/u5E0wRVzyYsouYY3W6w=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "23e89b7da85c3640bbc2173fe04f4bd114342367",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "src": "src"
+      }
+    },
+    "src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1731846404,
+        "narHash": "sha256-iYkxFgdvLRSNO6LEXI8+Xf87ehFZ8laFeLdUGZ5alnE=",
+        "owner": "donnieparka",
+        "repo": "databaseProject",
+        "rev": "6f6c60da1b21682bc729ef770b9b781bb5d5c683",
+        "type": "github"
+      },
+      "original": {
+        "owner": "donnieparka",
+        "repo": "databaseProject",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
